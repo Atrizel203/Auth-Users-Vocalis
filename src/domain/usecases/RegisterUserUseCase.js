@@ -8,13 +8,13 @@ class RegisterUserUseCase {
     this.passwordHasher = passwordHasher;
   }
 
-  async execute({ email, password, fullName, age }) {
+  async execute({ email, password, fullName, age, gender = null, dialect = 'mx_neutral' }) {
     if (!email || !password || !fullName || !age) {
-      throw new AppError('Todos los campos son obligatorios', 400);
+      throw new AppError('Todos los campos son obligatorios (email, password, fullName, age)', 400);
     }
 
-    if (age < 0 || age > 150) {
-      throw new AppError('La edad debe estar entre 0 y 150 años', 400);
+    if (age < 5 || age > 99) {
+      throw new AppError('La edad debe estar entre 5 y 99 años', 400);
     }
 
     const existingUser = await this.userRepository.findByEmail(email);
@@ -25,10 +25,12 @@ class RegisterUserUseCase {
     const passwordHash = await this.passwordHasher.hash(password);
 
     const user = User.createFromRegistration({ email, passwordHash });
-    const userProfile = UserProfile.createFromRegistration({ 
-      userId: null, 
-      fullName, 
-      age 
+    const userProfile = UserProfile.createFromRegistration({
+      userId: null,
+      fullName,
+      age,
+      gender,
+      dialect
     });
 
     const savedUser = await this.userRepository.save(user, userProfile);

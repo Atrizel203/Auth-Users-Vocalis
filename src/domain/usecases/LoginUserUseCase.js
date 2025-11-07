@@ -17,14 +17,21 @@ class LoginUserUseCase {
       throw new AppError('Credenciales inválidas', 401);
     }
 
+    if (!user.isActive) {
+      throw new AppError('Esta cuenta ha sido desactivada', 403);
+    }
+
     const isPasswordValid = await this.passwordHasher.compare(password, user.passwordHash);
     if (!isPasswordValid) {
       throw new AppError('Credenciales inválidas', 401);
     }
 
-    const payload = { 
-      userId: user.id, 
-      role: user.role 
+    user.updateLastLogin();
+    await this.userRepository.update(user);
+
+    const payload = {
+      userId: user.id,
+      role: user.role
     };
     const accessToken = await this.tokenGenerator.generateAccessToken(payload);
 
