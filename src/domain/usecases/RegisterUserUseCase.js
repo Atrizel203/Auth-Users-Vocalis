@@ -13,6 +13,15 @@ class RegisterUserUseCase {
       throw new AppError('Todos los campos son obligatorios (email, password, fullName, age)', 400);
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw new AppError('El formato del email no es válido', 400);
+    }
+
+    if (password.length < 8) {
+      throw new AppError('La contraseña debe tener al menos 8 caracteres', 400);
+    }
+
     if (age < 5 || age > 99) {
       throw new AppError('La edad debe estar entre 5 y 99 años', 400);
     }
